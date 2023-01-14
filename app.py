@@ -2,15 +2,39 @@
 # the 'validators' package is one possible option
 import validators
 
-# validate input and check for errors
-# here's a bad URL
-url1 = "lksjdflkjsdlkfjslkdfjlksjdf"
+# for all our URL request handling
+import requests
 
-# and here's a good URL
-url2 = "http://www.theverge.com/rss/index.xml"
+# for DOM handling
+from bs4 import BeautifulSoup
 
-print("Valid URL!" if validators.url(url1) else "Invalid URL!")
-print("Valid URL!" if validators.url(url2) else "Invalid URL!")
+# File containing our URLs
+urls = 'urls.txt'
+
+# TODO: Add functionality that checks if URL is an RSS feed;
+# if not, search URL response body for the feed URL. This can
+# be a relative or absolute path, so need to account for both.
+# It can also be extensionless (/feed/) or have an extension
+# (/feed/rss.xml). Should be able to confirm type based on HTTP
+# response.
+
+# Loop through list of URLs, requesting each one. Handle error
+# if URL is no good.
+with open(urls) as urls:
+    for url in urls:
+        try:
+            r = requests.get(url)
+            content_type = r.headers.get('content-type')
+            # print(content_type)
+            if ("text/html" in content_type):
+                print("HTML file")
+            elif ("application/xml" in content_type):
+                print("XML file")
+        except requests.exceptions.MissingSchema:
+            print('No scheme on URL')
+        except:
+            print('An unknown error happened')
+        
 
 # handle errors, if any
 
