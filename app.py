@@ -18,22 +18,34 @@ urls = 'urls.txt'
 # (/feed/rss.xml). Should be able to confirm type based on HTTP
 # response.
 
-# Loop through list of URLs, requesting each one. Handle error
-# if URL is no good.
+# Loop through list of URLs
 with open(urls) as urls:
     for url in urls:
         try:
+            # Request each URL and get the content type from the response
             r = requests.get(url)
             content_type = r.headers.get('content-type')
-            # print(content_type)
+            print(content_type)
+
+            # If the URL is text/html, we need to do some additional work
             if ("text/html" in content_type):
-                print("HTML file")
+
+                # Turn the response into a BeautifulSoup object for
+                # ease of processing/searching
+                soup = BeautifulSoup(r.text, 'html.parser')
+                print(soup)
+
+                # Get all elements with type of rss+xml
+                links = soup.find_all(type="application/rss+xml")
+                print(links)
             elif ("application/xml" in content_type):
                 print("XML file")
         except requests.exceptions.MissingSchema:
             print('No scheme on URL')
-        except:
-            print('An unknown error happened')
+        except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(ex).__name__, ex.args)
+            print(message)
         
 
 # handle errors, if any
